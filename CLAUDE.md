@@ -4,9 +4,9 @@ Single-purpose repo: provisioning F5 Distributed Cloud CE (SMSv2) nodes on
 Proxmox via Claude Code. This file is loaded automatically into every
 session in this repo.
 
-Parent context (full homelab network map, Bifrost gateway, branch discipline,
-etc.) lives in the `envoy_ai_gateway` repo — this repo doesn't duplicate it.
-Only F5 CE-relevant facts live here.
+If you're using this repo as a template for your own environment, treat
+every `<PLACEHOLDER>` below as something to fill in with your own values —
+nothing in this file should reference a specific person's network layout.
 
 ---
 
@@ -14,17 +14,21 @@ Only F5 CE-relevant facts live here.
 
 This repo provisions F5 XC CE nodes on **one** Proxmox host. It does not
 touch, and has no business touching:
-- The Ollama/Bifrost/Envoy VMs (managed in `envoy_ai_gateway`)
-- The NUC/ESXi host (10.0.0.30) — off-limits until Phase 5, unrelated to
-  this repo regardless
+- Any other VM or service not directly involved in CE provisioning
+- Any host not explicitly named as the provisioning target for a given task
 - Anything outside `qm` commands, cloud-init snippets, and F5 Console/API
   interactions for CE nodes
+
+If you're running this alongside other infrastructure-as-code repos, keep
+broader network/service context in those repos — this one should stay
+narrowly scoped to CE provisioning so its instructions stay easy to follow
+and audit.
 
 ## Target Host
 
 | Host | IP | Role |
 |---|---|---|
-| Proxmox host | 10.0.0.251 | Hypervisor — root SSH, key-based only |
+| Proxmox host | `<PROXMOX_HOST_IP>` | Hypervisor — root SSH, key-based only |
 
 F5 XC CE nodes provisioned here each get their own SLO IP (see individual
 provisioning inputs) — there is no fixed IP for "the CE node."
@@ -46,6 +50,9 @@ provisioning inputs) — there is no fixed IP for "the CE node."
   block in `docs/f5-ce-proxmox-setup.md` Step 8 before `qm start` runs. SLO
   IP/MAC and HA mode are permanent after registration — this gate is never
   skipped or softened.
+- **Check vCPU headroom, not just RAM/disk.** A host can show comfortable
+  free RAM while still being oversubscribed on physical cores if other VMs
+  are already running — check both before provisioning.
 - **Diagnose before rewriting.** Read `journalctl` / actual error output
   before proposing a fix.
 
@@ -61,7 +68,10 @@ provisioning inputs) — there is no fixed IP for "the CE node."
   Never pass a token as a bare shell argument — write it into the target
   file via SSH heredoc. Never print the token value back in a response.
   Every provisioning task ends with a reminder to regenerate the token in
-  the F5 Console once registration succeeds.
+  the F5 Console once registration succeeds. Note: a heredoc avoids shell
+  history and printed response text, but the tool-call transcript itself
+  still carries the token — token rotation after use is the actual
+  safeguard, not just the heredoc technique.
 
 ---
 
@@ -69,12 +79,17 @@ provisioning inputs) — there is no fixed IP for "the CE node."
 
 - `docs/f5-ce-proxmox-setup.md` — full provisioning procedure, steps 1-9
 - `.claude/agents/f5-ce-provisioner.md` — subagent that executes steps 4-9
+- `docs/provisioning-caveats.md` — real-world gotchas discovered running
+  this procedure, not yet folded into the main doc
 
-## Current State
+## Current State — Provisioned Nodes
+
+Track nodes you've provisioned through this repo here. Example row shown —
+replace with your own, delete the example once you have real entries:
 
 | VM ID | Name | SLO IP | Provisioned | Status |
 |---|---|---|---|---|
-| 105 | netta-cl-prox-auto | 10.0.0.231/24 | 2026-08-12 | Booted, network-reachable, pending Console registration confirmation |
+| `<example>` | `<example>` | `<example>` | `<YYYY-MM-DD>` | `<example>` |
 
-See `docs/provisioning-caveats.md` for gotchas hit during this run (Step 5
-boot-order ordering, CPU oversubscription on this host).
+See `docs/provisioning-caveats.md` for gotchas hit during past runs.
+
