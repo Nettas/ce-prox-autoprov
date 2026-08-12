@@ -1,0 +1,9 @@
+# Never commit filled-in credentials or scratch copies
+*.token
+*secrets*
+*filled-in*
+scratch/
+.env
+.mcp.json.local
+XC_MCP_TOKEN
+.claude/settings.local.json

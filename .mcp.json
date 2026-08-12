@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "xc-mcp": {
+      "type": "http",
+      "url": "http://10.0.0.241:3000",
+      "headers": {
+        "Authorization": "Bearer ${XC_MCP_TOKEN}"
+      }
+    }
+  }
+}
