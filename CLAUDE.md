@@ -72,5 +72,9 @@ provisioning inputs) — there is no fixed IP for "the CE node."
 
 ## Current State
 
-No CE nodes provisioned via this repo yet as of setup. Update this section
-as nodes are added — VM ID, name, SLO IP, provisioned date, status.
+| VM ID | Name | SLO IP | Provisioned | Status |
+|---|---|---|---|---|
+| 105 | netta-cl-prox-auto | 10.0.0.231/24 | 2026-08-12 | Booted, network-reachable, pending Console registration confirmation |
+
+See `docs/provisioning-caveats.md` for gotchas hit during this run (Step 5
+boot-order ordering, CPU oversubscription on this host).
