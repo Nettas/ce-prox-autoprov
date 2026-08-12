@@ -74,33 +74,28 @@ deviate from that doc's commands without stopping to ask first.
 - If a command fails, read the actual error before proposing a fix — don't
   speculatively retry with a different flag.
 
-## xc-mcp integration (pending tool verification — not yet enabled)
+## xc-mcp integration — findings (2026-08-12)
 
-`.mcp.json` in this repo registers xc-mcp (10.0.0.241:3000) as a project
-MCP server, auth via `XC_MCP_TOKEN` env var (never committed — set it in
-your shell or a local, gitignored `.env`).
+xc-mcp (v0.5.0, 10.0.0.241:3000) does NOT expose 1,810 individually-named
+tools. It exposes 18 generic meta-tools, the relevant one being
+`xc_call_api` — a fully generic passthrough that accepts any HTTP method
+and any API path, with zero server-side validation or allowlisting
+(confirmed by reading /app/dist/src/tools/call-api.js and
+/app/dist/src/lib/api-client.js directly in the running container — the
+code passes method and path straight to fetch() with no checks).
 
-Once the specific xc-mcp tool names for Secure Mesh Site creation and node
-token generation are confirmed (run an MCP tools/list against xc-mcp — do
-not assume), add them explicitly to this agent's `tools:` frontmatter,
-e.g.:
+The configured credential (XC_API_TOKEN) carries the ves-io-power-developer-role,
+which grants read/write across assigned namespaces plus read access to
+billing/user management — not full tenant-admin, but far broader than
+"Site + token management only." Since the code has zero scoping and the
+role has none either, granting `xc_call_api` to this agent would expose
+its full read/write surface across those namespaces.
 
-```yaml
-tools: Bash, Read, Grep, mcp__xc-mcp__create_secure_mesh_site, mcp__xc-mcp__generate_node_token
-```
+**Decision: this agent does NOT use xc-mcp for Site creation or token
+generation.** Steps 1-3 remain manual, done by the human in the F5 Console.
+`.mcp.json` in this repo stays registered but unused by this agent's tool
+grants.
 
-Do NOT grant this agent wildcard access to xc-mcp's full tool catalog
-(1,810 operations) — that's far outside this agent's scope (CE
-provisioning only) and defeats the point of least-privilege tool scoping.
-
-When enabled, steps 1-2 become:
-1. Call `create_secure_mesh_site` (or equivalent) with the site name.
-2. Call `generate_node_token` (or equivalent) for that site.
-3. Take the returned token and write it directly into the cloud-init file
-   via SSH heredoc — **never print the token value in response text**,
-   even though it came from an API call rather than a human paste. Same
-   rule applies regardless of source.
-
-Until tool names are confirmed and added above, this agent still expects
-the human to complete steps 1-3 in the F5 Console manually and pass the
-token in as an input.
+Real automation of steps 1-2 would require a genuinely scoped F5 XC custom
+role (RBAC supports custom roles limited to specific API groups) issued as
+a dedicated token for this purpose — not yet requested or configured.
