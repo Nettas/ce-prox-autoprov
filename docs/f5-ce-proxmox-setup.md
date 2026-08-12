@@ -1,4 +1,4 @@
-[200~# F5 Distributed Cloud CE (SMSv2) — Single Node on Proxmox
+## F5 Distributed Cloud CE (SMSv2) — Single Node on Proxmox
 *Example VM name: ce-example | Example SLO IP: <SLO_IP> | Example Proxmox VM ID: 103*
 
 Deploys a single-node F5 Distributed Cloud Customer Edge using Secure Mesh Site v2
