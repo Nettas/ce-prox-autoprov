@@ -1,8 +1,7 @@
 # ce_proxmox_autoprovision
 
 Claude Code-driven provisioning for F5 Distributed Cloud CE (SMSv2) nodes on
-Proxmox (KVM). Standalone repo — scoped to this one task, not part of the
-broader homelab AI gateway build (envoy_ai_gateway).
+Proxmox (KVM). 
 
 ## Structure
 
